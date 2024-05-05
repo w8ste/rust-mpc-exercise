@@ -72,7 +72,7 @@ impl Circuit {
 
         if lines.len() < 5 {
             return Err(CircuitError::ParsingError(
-                "the Circuit being to small".to_string(),
+                "the Circuit being too small".to_string(),
             ));
         }
 
