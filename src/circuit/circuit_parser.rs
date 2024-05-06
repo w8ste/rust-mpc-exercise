@@ -194,7 +194,7 @@ impl Circuit {
 #[cfg(test)]
 mod tests {
 
-    use crate::circuit::circuit::{Gate, GateType};
+    use crate::circuit::circuit_parser::{Gate, GateType};
 
     use super::Circuit;
     // Functions marked with `#[test]` are automatically run when you execute `cargo test`.

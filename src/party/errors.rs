@@ -7,6 +7,7 @@ pub enum PartyError<'a> {
     ThreadTransmissionError,
     ThreadSendingError,
     ThreadReceivingError,
+    WireNotSetError(usize),
     PError(Box<dyn Error + 'a>),
 }
 
@@ -14,13 +15,16 @@ impl<'a> Display for PartyError<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             PartyError::ThreadTransmissionError => {
-                write!(f, "Error, whilst Transmissioning Data between Threads",)
+                write!(f, "Error, whilst Transmissioning Data between Threads")
             }
             PartyError::ThreadSendingError => {
-                write!(f, "Error, whilst Transmissioning Data between Threads",)
+                write!(f, "Error, whilst Transmissioning Data between Threads")
             }
             PartyError::ThreadReceivingError => {
-                write!(f, "Error, whilst Transmissioning Data between Threads",)
+                write!(f, "Error, whilst Transmissioning Data between Threads")
+            }
+            PartyError::WireNotSetError(wire) => {
+                write!(f, "Wire {} has not been set yet", wire)
             }
 
             PartyError::PError(e) => write!(f, "ProtocolError! {}", *e),

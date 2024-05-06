@@ -5,6 +5,7 @@ use rand::rngs::StdRng;
 use rand::{thread_rng, Rng, RngCore};
 use std::cell::RefCell;
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::usize;
 
 pub struct Party<T: MTProvider> {
     circuit: Circuit,
@@ -100,6 +101,15 @@ impl<T: MTProvider> Party<T> {
         }
     }
 
+    fn get_wire_value(&self, wires: &[Option<bool>], w: usize) -> Result<bool, PartyError<'_>> {
+        match wires[w] {
+            Some(value) => Ok(value),
+            None => {
+                return Err(PartyError::WireNotSetError(w));
+            }
+        }
+    }
+
     /// Executes the GMW protocol with the linked party for the stored circuit.
     pub fn execute(&mut self, input: &[bool; 64]) -> Result<Vec<bool>, PartyError> {
         // TODO change error type
@@ -140,7 +150,12 @@ impl<T: MTProvider> Party<T> {
             let output_index: usize = *output;
             match *gate_type {
                 GateType::INV(a) => {
-                    let input = wires[a].unwrap_or_else(|| panic!("Wire should have been set"));
+                    let input = match self.get_wire_value(&wires, a) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
                     if self.is_p1 {
                         wires[output_index] = Some(!input);
                     } else {
@@ -148,13 +163,37 @@ impl<T: MTProvider> Party<T> {
                     }
                 }
                 GateType::XOR(a, b) => {
-                    let input1 = wires[a].unwrap_or_else(|| panic!("wire should have been set"));
-                    let input2 = wires[b].unwrap_or_else(|| panic!("wire should have been set"));
+                    let input1 = match self.get_wire_value(&wires, a) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
+
+                    let input2 = match self.get_wire_value(&wires, b) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
+
                     wires[output_index] = Some(input1 ^ input2);
                 }
                 GateType::AND(a, b) => {
-                    let input1 = wires[a].unwrap_or_else(|| panic!("Wire should have been set"));
-                    let input2 = wires[b].unwrap_or_else(|| panic!("Wire should have been set"));
+                    let input1 = match self.get_wire_value(&wires, a) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
+
+                    let input2 = match self.get_wire_value(&wires, b) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
+
                     wires[output_index] = Some(self.evaluate_and(input1, input2)?);
                 }
             }
